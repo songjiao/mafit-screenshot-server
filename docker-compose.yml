@@ -1,0 +1,42 @@
+services:
+  screenshot-server:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./screenshots:/app/screenshots
+      - ./logs:/app/logs
+    environment:
+      # 浏览器配置
+      - CHROME_PATH=/usr/bin/chromium-browser
+      - CHROME_BIN=/usr/bin/chromium-browser
+      - BROWSER_POOL_SIZE=${BROWSER_POOL_SIZE:-20}
+      - BROWSER_TIMEOUT=${BROWSER_TIMEOUT:-60s}
+      - BROWSER_USER_AGENT=${BROWSER_USER_AGENT:-Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36}
+      # AWS配置
+      - AWS_REGION=${AWS_REGION:-ap-east-1}
+      - AWS_S3_BUCKET=${AWS_S3_BUCKET}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      # CDN配置
+      - CDN_BASE_URL=${CDN_BASE_URL}
+
+      # Mafit配置
+      - MAFIT_BASE_URL=${MAFIT_BASE_URL:-https://mafit.fun}
+      - MAFIT_JWT_TOKEN=${MAFIT_JWT_TOKEN}
+      - MAFIT_SIDEBAR_SHEET=${MAFIT_SIDEBAR_SHEET:-off}
+    env_file:
+      - .env
+    networks:
+      - screenshot-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  screenshot-network:
+    driver: bridge

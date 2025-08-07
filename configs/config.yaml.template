@@ -1,0 +1,54 @@
+server:
+  port: 8080
+  host: "0.0.0.0"
+  read_timeout: 30s
+  write_timeout: 30s
+  static_path: "web/static"
+  template_path: "web/templates"
+
+browser:
+  headless: true
+  timeout: ${BROWSER_TIMEOUT:-60s}
+  pool_size: ${BROWSER_POOL_SIZE:-20}  # 浏览器池大小
+  user_agent: "${BROWSER_USER_AGENT:-Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36}"
+
+task:
+  max_concurrent: 5
+  timeout: 300s
+  retry_count: 3
+  status_ttl: 3600s
+
+s3:
+  region: "${AWS_REGION:-ap-east-1}"
+  bucket: "${AWS_S3_BUCKET:-your-bucket-name}"
+  image_prefix: "screenshot"
+  result_prefix: "screenshot_result"
+  access_key_id: "${AWS_ACCESS_KEY_ID}"
+  secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
+
+cdn:
+  base_url: "${CDN_BASE_URL:-https://your-cdn-domain.com}"
+  result_path: "screenshots"
+
+mafit:
+  base_url: "${MAFIT_BASE_URL:-https://mafit.fun}"
+  jwt_access_token: "${MAFIT_JWT_TOKEN}"
+  sidebar_sheet: "${MAFIT_SIDEBAR_SHEET:-off}"
+  market_hours:
+    us:
+      start_hour: 9
+      end_hour: 16
+      timezone: "America/New_York"
+    hk:
+      start_hour: 9
+      end_hour: 16
+      timezone: "Asia/Hong_Kong"
+    cn:
+      start_hour: 9
+      end_hour: 15
+      timezone: "Asia/Shanghai"
+
+logging:
+  level: "info"
+  format: "json"
+  output: "stdout"

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.title}} - {{.symbolMarket}}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>股票分析 - {{.symbolMarket}}</h1>
+            <a href="/" class="btn-back">返回首页</a>
+        </header>
+        
+        <main>
+            <div id="progress" class="progress-container" style="display:none;">
+                <h3>分析进度</h3>
+                <div id="progressText" class="progress-text">准备开始...</div>
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill"></div>
+                </div>
+            </div>
+            
+            <div id="result" class="result-container" style="display:none;">
+                <h3>分析结果</h3>
+                
+                <div id="charts" class="charts-container">
+                    <div class="chart-item">
+                        <h4>日线图</h4>
+                        <img id="dailyChart" alt="日线图" class="chart-image">
+                    </div>
+                    <div class="chart-item">
+                        <h4>小时图</h4>
+                        <img id="hourlyChart" alt="小时图" class="chart-image">
+                    </div>
+                </div>
+                
+                <div id="analysisContent" class="analysis-content">
+                    <!-- AI分析结果将在这里显示 -->
+                </div>
+            </div>
+            
+            <div id="error" class="error-container" style="display:none;">
+                <h3>分析失败</h3>
+                <p id="errorMessage"></p>
+                <button onclick="location.reload()" class="btn-primary">重试</button>
+            </div>
+        </main>
+        
+        <footer>
+            <p>&copy; 2025 股票截图服务. 仅供学习参考，不构成投资建议.</p>
+        </footer>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script>
+        // 页面加载完成后自动开始分析
+        document.addEventListener('DOMContentLoaded', function() {
+            const symbolMarket = '{{.symbolMarket}}';
+            if (symbolMarket) {
+                startAnalysis(symbolMarket);
+            }
+        });
+    </script>
+</body>
+</html> 

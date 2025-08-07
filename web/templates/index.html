@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.title}}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>股票截图服务</h1>
+            <p>基于mafit.fun的股票K线图截图工具</p>
+        </header>
+        
+        <main>
+            <div class="analysis-form">
+                <h2>开始分析</h2>
+                <form id="analysisForm">
+                    <div class="form-group">
+                        <label for="symbol">股票代码</label>
+                        <input type="text" id="symbol" name="symbol" placeholder="例如: NVDA" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="market">市场</label>
+                        <select id="market" name="market" required>
+                            <option value="">请选择市场</option>
+                            <option value="us">美股</option>
+                            <option value="hk">港股</option>
+                            <option value="cn">A股</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">开始分析</button>
+                </form>
+            </div>
+            
+            <div class="features">
+                <h2>功能特点</h2>
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <h3>智能截图</h3>
+                        <p>自动截取mafit.fun的K线图，支持日线和小时线</p>
+                    </div>
+                    <div class="feature-item">
+                        <h3>多市场支持</h3>
+                        <p>支持美股、港股、A股等多个市场</p>
+                    </div>
+                    <div class="feature-item">
+                        <h3>实时进度</h3>
+                        <p>实时显示截图进度，让您了解处理状态</p>
+                    </div>
+                    <div class="feature-item">
+                        <h3>云存储</h3>
+                        <p>自动上传到S3并返回CDN链接</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>&copy; 2025 股票截图服务. 仅供学习参考，不构成投资建议.</p>
+        </footer>
+    </div>
+    
+    <script src="/static/js/app.js"></script>
+</body>
+</html> 
