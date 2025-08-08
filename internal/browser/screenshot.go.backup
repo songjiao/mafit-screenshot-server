@@ -123,11 +123,6 @@ func (sc *ScreenshotClient) TakeScreenshotWithViewport(url, outputPath string, w
 	case <-refreshCtx.Done():
 		logger.Warn("Refresh operation timed out after 45s, taking screenshot of current page state")
 	}
-	// 检查是否有手动刷新按钮，如果有就点击
-	logger.Info("Checking for manual refresh button after refresh operation...")
-	if err := sc.checkAndClickManualRefresh(page); err != nil {
-		logger.WithError(err).Warn("Failed to handle manual refresh button, continuing anyway")
-	}
 
 	// 等待一小段时间确保页面稳定
 	logger.Info("Waiting for page to stabilize...")
@@ -547,68 +542,4 @@ func (sc *ScreenshotClient) clickRefreshAndWaitForLoad(page *rod.Page) error {
 	}
 }
 
-
-
-func (sc *ScreenshotClient) checkAndClickManualRefresh(page *rod.Page) error {
-	logger := utils.GetLogger()
-	
-	// 等待页面稳定
-	time.Sleep(1 * time.Second)
-	
-	// 查找手动刷新按钮的选择器
-	selectors := []string{
-		"button:contains(\"手动刷新\")",
-		"button:contains(\"Manual Refresh\")",
-		"[data-testid*=\"manual-refresh\"]",
-		"[class*=\"manual-refresh\"]",
-		"button[aria-label*=\"手动刷新\"]",
-		"button[title*=\"手动刷新\"]",
-		// 更通用的选择器
-		"button",
-		"div[role=\"button\"]",
-	}
-	
-	for _, selector := range selectors {
-		logger.Debugf("Trying to find manual refresh button with selector: %s", selector)
-		
-		elements, _ := page.Elements(selector)
-		for _, element := range elements {
-			if element == nil {
-				continue
-			}
-			
-			// 检查元素是否可见
-			visible, err := element.Visible()
-			if err != nil || !visible {
-				continue
-			}
-			
-			// 获取按钮文本
-			text, _ := element.Text()
-			logger.Debugf("Found element with text: %s", text)
-			
-			// 检查是否是手动刷新按钮
-			if strings.Contains(text, "手动刷新") || strings.Contains(text, "Manual Refresh") {
-				logger.Infof("Found manual refresh button: %s", text)
-				
-				// 点击手动刷新按钮
-				logger.Info("Clicking manual refresh button...")
-				if err := element.Click(proto.InputMouseButtonLeft, 1); err != nil {
-					logger.WithError(err).Error("Failed to click manual refresh button")
-					return fmt.Errorf("failed to click manual refresh button: %w", err)
-				}
-				
-				// 等待页面重新加载
-				logger.Info("Waiting for page to reload after manual refresh...")
-				time.Sleep(5 * time.Second)
-				
-				logger.Info("Manual refresh button clicked successfully")
-				return nil
-			}
-		}
-	}
-	
-	logger.Debug("No manual refresh button found")
-	return nil
-}
 

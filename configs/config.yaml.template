@@ -3,50 +3,33 @@ server:
   host: "0.0.0.0"
   read_timeout: 30s
   write_timeout: 30s
-  static_path: "web/static"
-  template_path: "web/templates"
 
 browser:
   headless: true
-  timeout: ${BROWSER_TIMEOUT:-60s}
-  pool_size: ${BROWSER_POOL_SIZE:-20}  # 浏览器池大小
-  user_agent: "${BROWSER_USER_AGENT:-Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36}"
-
-task:
-  max_concurrent: 5
-  timeout: 300s
-  retry_count: 3
-  status_ttl: 3600s
+  timeout: 60s
+  pool_size: 1              # 浏览器池大小，默认1个实例
+  user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+  
+  # 高配服务器性能优化配置
+  max_concurrent_pages: 20  # 每个浏览器最大并发页面数
+  renderer_processes: 16    # 渲染进程数
+  webgl_contexts: 8         # WebGL上下文数
+  memory_limit: 2048        # 内存限制(MB)
 
 s3:
-  region: "${AWS_REGION:-ap-east-1}"
-  bucket: "${AWS_S3_BUCKET:-your-bucket-name}"
+  region: "ap-east-1"
+  bucket: "your-bucket-name"
   image_prefix: "screenshot"
-  result_prefix: "screenshot_result"
-  access_key_id: "${AWS_ACCESS_KEY_ID}"
-  secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
+  access_key_id: ""
+  secret_access_key: ""
 
 cdn:
-  base_url: "${CDN_BASE_URL:-https://your-cdn-domain.com}"
-  result_path: "screenshots"
+  base_url: "https://your-cdn-domain.com"
 
 mafit:
-  base_url: "${MAFIT_BASE_URL:-https://mafit.fun}"
-  jwt_access_token: "${MAFIT_JWT_TOKEN}"
-  sidebar_sheet: "${MAFIT_SIDEBAR_SHEET:-off}"
-  market_hours:
-    us:
-      start_hour: 9
-      end_hour: 16
-      timezone: "America/New_York"
-    hk:
-      start_hour: 9
-      end_hour: 16
-      timezone: "Asia/Hong_Kong"
-    cn:
-      start_hour: 9
-      end_hour: 15
-      timezone: "Asia/Shanghai"
+  base_url: "https://mafit.fun"
+  jwt_access_token: ""
+  sidebar_sheet: "off"
 
 logging:
   level: "info"

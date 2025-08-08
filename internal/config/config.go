@@ -10,7 +10,6 @@ import (
 type Config struct {
 	Server  ServerConfig  `mapstructure:"server"`
 	Browser BrowserConfig `mapstructure:"browser"`
-	Task    TaskConfig    `mapstructure:"task"`
 	S3      S3Config      `mapstructure:"s3"`
 	CDN     CDNConfig     `mapstructure:"cdn"`
 	Mafit   MafitConfig   `mapstructure:"mafit"`
@@ -22,36 +21,33 @@ type ServerConfig struct {
 	Host         string        `mapstructure:"host"`
 	ReadTimeout  time.Duration `mapstructure:"read_timeout"`
 	WriteTimeout time.Duration `mapstructure:"write_timeout"`
-	StaticPath   string        `mapstructure:"static_path"`
-	TemplatePath string        `mapstructure:"template_path"`
 }
 
 type BrowserConfig struct {
-	Headless  bool          `mapstructure:"headless"`
-	Timeout   time.Duration `mapstructure:"timeout"`
-	PoolSize  int           `mapstructure:"pool_size"` // 浏览器池大小
-	UserAgent string        `mapstructure:"user_agent"`
+	Headless     bool          `mapstructure:"headless"`
+	Timeout      time.Duration `mapstructure:"timeout"`
+	PoolSize     int           `mapstructure:"pool_size"`      // 浏览器池大小
+	UserAgent    string        `mapstructure:"user_agent"`
+	
+	// 性能优化配置
+	MaxConcurrentPages int `mapstructure:"max_concurrent_pages"` // 每个浏览器最大并发页面数
+	RendererProcesses  int `mapstructure:"renderer_processes"`   // 渲染进程数
+	WebGLContexts      int `mapstructure:"webgl_contexts"`       // WebGL上下文数
+	MemoryLimit        int `mapstructure:"memory_limit"`         // 内存限制(MB)
 }
 
-type TaskConfig struct {
-	MaxConcurrent int           `mapstructure:"max_concurrent"`
-	Timeout       time.Duration `mapstructure:"timeout"`
-	RetryCount    int           `mapstructure:"retry_count"`
-	StatusTTL     time.Duration `mapstructure:"status_ttl"`
-}
+
 
 type S3Config struct {
 	Region          string `mapstructure:"region"`
 	Bucket          string `mapstructure:"bucket"`
 	ImagePrefix     string `mapstructure:"image_prefix"`
-	ResultPrefix    string `mapstructure:"result_prefix"`
 	AccessKeyID     string `mapstructure:"access_key_id"`
 	SecretAccessKey string `mapstructure:"secret_access_key"`
 }
 
 type CDNConfig struct {
-	BaseURL    string `mapstructure:"base_url"`
-	ResultPath string `mapstructure:"result_path"`
+	BaseURL string `mapstructure:"base_url"`
 }
 
 
@@ -60,15 +56,6 @@ type MafitConfig struct {
 	BaseURL        string `mapstructure:"base_url"`
 	JWTAccessToken string `mapstructure:"jwt_access_token"`
 	SidebarSheet   string `mapstructure:"sidebar_sheet"`
-	// 市场开市时间配置（24小时制）
-	MarketHours map[string]MarketHours `mapstructure:"market_hours"`
-}
-
-// MarketHours 市场开市时间
-type MarketHours struct {
-	StartHour int    `mapstructure:"start_hour"` // 开市小时（0-23）
-	EndHour   int    `mapstructure:"end_hour"`   // 闭市小时（0-23）
-	Timezone  string `mapstructure:"timezone"`   // 时区，如 "America/New_York"
 }
 
 type LoggingConfig struct {
@@ -90,6 +77,10 @@ func Load(configPath string) (*Config, error) {
 	viper.BindEnv("browser.pool_size", "BROWSER_POOL_SIZE")
 	viper.BindEnv("browser.timeout", "BROWSER_TIMEOUT")
 	viper.BindEnv("browser.user_agent", "BROWSER_USER_AGENT")
+	viper.BindEnv("browser.max_concurrent_pages", "BROWSER_MAX_CONCURRENT")
+	viper.BindEnv("browser.renderer_processes", "BROWSER_RENDERER_PROCESSES")
+	viper.BindEnv("browser.webgl_contexts", "BROWSER_WEBGL_CONTEXTS")
+	viper.BindEnv("browser.memory_limit", "BROWSER_MEMORY_LIMIT")
 	viper.BindEnv("s3.region", "AWS_REGION")
 	viper.BindEnv("s3.bucket", "AWS_S3_BUCKET")
 	viper.BindEnv("s3.access_key_id", "AWS_ACCESS_KEY_ID")

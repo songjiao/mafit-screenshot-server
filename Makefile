@@ -1,14 +1,13 @@
-.PHONY: help build test clean docker-build docker-run deploy
+.PHONY: help build test clean docker-build docker-run deploy docker-build-optimized
 
 # 默认目标
 help:
 	@echo "可用的命令:"
-	@echo "  build        - 构建应用"
-	@echo "  test         - 运行测试"
+	@echo "  build        - 构建截图服务"
 	@echo "  clean        - 清理构建文件"
-	@echo "  docker-build - 构建Docker镜像"
+	@echo "  docker-build - 构建Docker镜像（传统方式）"
+	@echo "  docker-build-optimized - 构建Docker镜像（优化方式，分离基础镜像）"
 	@echo "  docker-run   - 运行Docker容器"
-	@echo "  deploy       - 部署到服务器"
 	@echo "  help         - 显示此帮助信息"
 
 # 构建应用
@@ -17,11 +16,6 @@ build:
 	go build -o bin/screenshot-server cmd/screenshot-server/main.go
 	@echo "构建完成: bin/screenshot-server"
 
-# 运行测试
-test:
-	@echo "运行测试..."
-	go test ./...
-
 # 清理构建文件
 clean:
 	@echo "清理构建文件..."
@@ -29,11 +23,24 @@ clean:
 	rm -rf dist/
 	@echo "清理完成"
 
-# 构建Docker镜像
+# 构建Docker镜像（传统方式）
 docker-build:
 	@echo "构建Docker镜像..."
 	docker build -t screenshot-server:latest .
 	@echo "Docker镜像构建完成"
+
+# 构建Docker镜像（优化方式，分离基础镜像）
+docker-build-optimized:
+	@echo "构建优化版Docker镜像..."
+	@echo "📦 构建基础镜像..."
+	docker build -f Dockerfile.base -t screenshot-server-base:latest .
+	@echo "🚀 构建应用镜像..."
+	docker build -f Dockerfile -t screenshot-server:latest .
+	@echo "✅ 优化版Docker镜像构建完成"
+	@echo ""
+	@echo "📋 可用镜像："
+	@echo "  - screenshot-server-base:latest (基础环境)"
+	@echo "  - screenshot-server:latest (应用镜像)"
 
 # 测试Docker构建
 docker-test:
@@ -57,11 +64,7 @@ docker-stop:
 docker-logs:
 	docker-compose logs -f
 
-# 部署到服务器
-deploy:
-	@echo "部署到服务器..."
-	@echo "请确保已配置好服务器环境"
-	@echo "运行: ./deploy/deploy.sh"
+
 
 # 本地开发
 dev:

@@ -8,11 +8,13 @@ services:
       - ./logs:/app/logs
     environment:
       # 浏览器配置
-      - CHROME_PATH=/usr/bin/chromium-browser
-      - CHROME_BIN=/usr/bin/chromium-browser
-      - BROWSER_POOL_SIZE=${BROWSER_POOL_SIZE:-20}
+      - CHROME_PATH=/usr/bin/google-chrome-stable
+      - CHROME_BIN=/usr/bin/google-chrome-stable
+      - BROWSER_POOL_SIZE=${BROWSER_POOL_SIZE:-2}
+      - BROWSER_PAGE_POOL_SIZE=${BROWSER_PAGE_POOL_SIZE:-20}
       - BROWSER_TIMEOUT=${BROWSER_TIMEOUT:-60s}
       - BROWSER_USER_AGENT=${BROWSER_USER_AGENT:-Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36}
+      
       # AWS配置
       - AWS_REGION=${AWS_REGION:-ap-east-1}
       - AWS_S3_BUCKET=${AWS_S3_BUCKET}

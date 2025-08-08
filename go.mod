@@ -2,7 +2,7 @@ module makeprofit
 
 go 1.22
 
-toolchain go1.22.2
+toolchain go1.22.0
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.36.6
@@ -11,7 +11,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.84.1
 	github.com/gin-gonic/gin v1.10.1
 	github.com/go-rod/rod v0.116.2
-	github.com/gomarkdown/markdown v0.0.0-20250311123330-531bef5e742b
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/viper v1.20.1
 )

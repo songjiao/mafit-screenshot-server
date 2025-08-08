@@ -14,26 +14,25 @@
         </header>
         
         <main>
-            <div class="analysis-form">
-                <h2>开始分析</h2>
-                <form id="analysisForm">
-                    <div class="form-group">
-                        <label for="symbol">股票代码</label>
-                        <input type="text" id="symbol" name="symbol" placeholder="例如: NVDA" required>
+            <div class="screenshot-form">
+                <h2>股票截图</h2>
+                <p>输入股票代码和市场，获取K线图截图</p>
+                <div class="api-info">
+                    <h3>API 使用方式</h3>
+                    <div class="api-example">
+                        <h4>POST 方式</h4>
+                        <code>POST /api/v1/screenshot</code>
+                        <pre>{
+  "symbol": "NVDA",
+  "market": "us",
+  "timeframe": "1d"
+}</pre>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="market">市场</label>
-                        <select id="market" name="market" required>
-                            <option value="">请选择市场</option>
-                            <option value="us">美股</option>
-                            <option value="hk">港股</option>
-                            <option value="cn">A股</option>
-                        </select>
+                    <div class="api-example">
+                        <h4>GET 方式</h4>
+                        <code>GET /api/v1/screenshot/NVDA/us/1d</code>
                     </div>
-                    
-                    <button type="submit" class="btn-primary">开始分析</button>
-                </form>
+                </div>
             </div>
             
             <div class="features">
@@ -48,8 +47,8 @@
                         <p>支持美股、港股、A股等多个市场</p>
                     </div>
                     <div class="feature-item">
-                        <h3>实时进度</h3>
-                        <p>实时显示截图进度，让您了解处理状态</p>
+                        <h3>快速响应</h3>
+                        <p>优化的截图流程，快速返回结果</p>
                     </div>
                     <div class="feature-item">
                         <h3>云存储</h3>
@@ -64,6 +63,6 @@
         </footer>
     </div>
     
-    <script src="/static/js/app.js"></script>
+
 </body>
 </html> 

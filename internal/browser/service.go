@@ -36,10 +36,7 @@ func NewBrowserService(cfg *config.Config) (*BrowserService, error) {
 		return nil, fmt.Errorf("failed to create S3 client: %w", err)
 	}
 
-	// 创建任务管理器
-	taskManager := NewTaskManager(&cfg.CDN)
-
-	screenshotClient := NewScreenshotClient(browserPool, &cfg.Mafit, &cfg.Browser, s3Client, taskManager)
+	screenshotClient := NewScreenshotClient(browserPool, &cfg.Mafit, &cfg.Browser, s3Client)
 
 	return &BrowserService{
 		browserPool:      browserPool,
@@ -131,13 +128,7 @@ func (bs *BrowserService) GetStats() map[string]interface{} {
 	}
 }
 
-// GetTaskManager 获取任务管理器
-func (bs *BrowserService) GetTaskManager() (*TaskManager, bool) {
-	if bs.screenshotClient != nil && bs.screenshotClient.taskManager != nil {
-		return bs.screenshotClient.taskManager, true
-	}
-	return nil, false
-}
+
 
 // TakeScreenshotAndUpload 截取截图并上传到S3
 func (bs *BrowserService) TakeScreenshotAndUpload(ctx context.Context, symbol, market, timeframe string) (*s3.UploadResult, error) {

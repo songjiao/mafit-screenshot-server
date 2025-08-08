@@ -2,6 +2,7 @@ package screenshot
 
 import (
 	"context"
+	"strings"
 	"fmt"
 	"net/http"
 	"time"
@@ -89,10 +90,13 @@ func (s *Service) TakeScreenshot(ctx context.Context, req *ScreenshotRequest) (*
 		"cdn_url":   uploadResult.URL,
 	}).Info("Screenshot completed successfully")
 
+	// 生成CDN URL
+	cdnURL := s.generateCDNURL(uploadResult.Key)
+
 	return &ScreenshotResponse{
 		Success:   true,
 		Message:   "Screenshot taken successfully",
-		CDNURL:    uploadResult.URL,
+		CDNURL:    cdnURL,
 		S3URL:     uploadResult.Key, // 这里存储S3 key而不是URL
 		Timestamp: time.Now().Format(time.RFC3339),
 	}, nil
@@ -100,7 +104,7 @@ func (s *Service) TakeScreenshot(ctx context.Context, req *ScreenshotRequest) (*
 
 // SetupRoutes 设置路由
 func (s *Service) SetupRoutes(r *gin.Engine) {
-	// 健康检查
+	// 健康检查 - 支持GET和HEAD请求
 	r.GET("/health", func(c *gin.Context) {
 		stats := s.browserService.GetStats()
 		c.JSON(http.StatusOK, gin.H{
@@ -108,6 +112,10 @@ func (s *Service) SetupRoutes(r *gin.Engine) {
 			"time":   time.Now().Format(time.RFC3339),
 			"stats":  stats,
 		})
+	})
+	
+	r.HEAD("/health", func(c *gin.Context) {
+		c.Status(http.StatusOK)
 	})
 
 	// API路由组
@@ -120,18 +128,9 @@ func (s *Service) SetupRoutes(r *gin.Engine) {
 		// 状态监控API
 		api.GET("/status", func(c *gin.Context) {
 			stats := s.browserService.GetStats()
-			taskManager, exists := s.browserService.GetTaskManager()
-			var taskStats map[string]interface{}
-			if exists {
-				taskStats = map[string]interface{}{
-					"running_tasks_count": taskManager.GetRunningTasksCount(),
-					"running_tasks":       taskManager.GetRunningTasks(),
-				}
-			}
 
 			c.JSON(http.StatusOK, gin.H{
 				"browser_stats": stats,
-				"task_stats":    taskStats,
 				"timestamp":     time.Now().Format(time.RFC3339),
 			})
 		})
@@ -205,6 +204,25 @@ func (s *Service) handleScreenshotGet(c *gin.Context) {
 	}
 }
 
+// generateCDNURL 生成CDN URL
+func (s *Service) generateCDNURL(s3Key string) string {
+	// 如果CDN配置为空，返回S3 URL
+	if s.config.CDN.BaseURL == "" || s.config.CDN.BaseURL == "https://your-cdn-domain.com" {
+		return fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s",
+			s.config.S3.Bucket, s.config.S3.Region, s3Key)
+	}
+
+	// 从S3 key中提取文件名部分（去掉screenshot/前缀）
+	// S3 key格式: screenshot/screenshots/PDD_us_1h_20250808_01.png
+	// 我们需要提取: screenshots/PDD_us_1h_20250808_01.png
+	fileName := s3Key
+	if strings.HasPrefix(s3Key, "screenshot/") {
+		fileName = strings.TrimPrefix(s3Key, "screenshot/")
+	}
+
+	// 生成CDN URL
+	return fmt.Sprintf("%s/%s", s.config.CDN.BaseURL, fileName)
+}
 // Close 关闭服务
 func (s *Service) Close() {
 	if s.browserService != nil {
