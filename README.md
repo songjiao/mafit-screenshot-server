@@ -4,17 +4,25 @@
 
 ## 功能特性
 
-- 🚀 **高性能截图**: 使用无头浏览器截取股票K线图
+- 🚀 **高性能截图**: 使用本地图表服务截取股票K线图
 - 📊 **多市场支持**: 支持美股(US)、港股(HK)、A股(CN)
 - ⏰ **智能时间处理**: 根据市场开市时间自动调整截图策略
 - 🔄 **去重机制**: 避免重复截图，提高效率
 - ☁️ **云存储集成**: 自动上传到S3并返回CDN URL
-- 💾 **内存优化**: 单例浏览器模式，内存使用仅150-200MB
+- 💾 **内存优化**: 使用本地图表服务，大幅减少内存占用
 - 🎯 **轻量级**: 适合低并发场景，如API调用
 
 ## 快速开始
 
-### 1. 配置
+### 1. 前置要求
+
+本服务依赖于mafit的本地内置图表服务器，请确保：
+
+1. **mafit已安装并运行**
+2. **本地图表服务可用**: 默认地址为 `http://127.0.0.1:4009`
+3. **网络连通性**: 确保服务能够访问图表服务器
+
+### 2. 配置
 
 编辑 `configs/config.yaml` 文件，配置以下内容：
 
@@ -25,10 +33,6 @@ server:
   read_timeout: 30s
   write_timeout: 30s
 
-browser:
-  headless: true
-  user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-
 s3:
   region: "ap-east-1"
   bucket: "your-bucket"
@@ -37,12 +41,9 @@ s3:
 
 cdn:
   base_url: "https://your-cdn-domain.com"
-  result_path: "screenshots"
 
-mafit:
-  base_url: "https://mafit.fun"
-  jwt_access_token: "your-jwt-token"
-  sidebar_sheet: "off"
+chart_service:
+  base_url: "http://192.168.1.76:4009"
 ```
 
 ## 部署方式
@@ -135,7 +136,31 @@ curl -X POST http://localhost:8080/api/v1/screenshot \
 curl http://localhost:8080/api/v1/screenshot/NVDA/us/1d
 ```
 
+### 带数据的截图API（推荐）
+
+这个API会在截图完成后自动下载JSON数据文件并上传到S3。
+
+#### POST 方式
+
+```bash
+curl -X POST http://localhost:8080/api/v1/screenshot-with-data \
+  -H "Content-Type: application/json" \
+  -d '{
+    "symbol": "NVDA",
+    "market": "us",
+    "timeframe": "1d"
+  }'
+```
+
+#### GET 方式
+
+```bash
+curl http://localhost:8080/api/v1/screenshot-with-data/NVDA/us/1d
+```
+
 ### 响应格式
+
+#### 普通截图响应
 
 ```json
 {
@@ -143,6 +168,20 @@ curl http://localhost:8080/api/v1/screenshot/NVDA/us/1d
   "message": "Screenshot taken successfully",
   "cdn_url": "https://your-cdn-domain.com/screenshots/NVDA_us_1d_20250729.png",
   "s3_url": "screenshot/screenshots/NVDA_us_1d_20250729.png",
+  "timestamp": "2025-07-29T10:46:22+08:00"
+}
+```
+
+#### 带数据的截图响应
+
+```json
+{
+  "success": true,
+  "message": "Screenshot with data taken successfully",
+  "cdn_url": "https://your-cdn-domain.com/screenshots/NVDA_us_1d_20250729.png",
+  "s3_url": "screenshot/screenshots/NVDA_us_1d_20250729.png",
+  "data_cdn_url": "https://your-cdn-domain.com/data/NVDA_us_1d_20250729.json",
+  "data_s3_url": "screenshot/data/NVDA_us_1d_20250729.json",
   "timestamp": "2025-07-29T10:46:22+08:00"
 }
 ```

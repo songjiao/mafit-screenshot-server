@@ -116,6 +116,32 @@ func (c *Client) UploadScreenshot(ctx context.Context, localPath, symbol, market
 	return c.UploadFile(ctx, localPath, s3Key)
 }
 
+// UploadJSONData 上传JSON数据文件
+func (c *Client) UploadJSONData(ctx context.Context, localPath, symbol, market, timeframe string) (*UploadResult, error) {
+	// 根据时间框架生成文件名
+	var s3Key string
+	now := time.Now()
+
+	switch timeframe {
+	case "1d":
+		// 日线：同一天内一支股票只有一张，格式：{symbol}_{market}_1d_{date}.json
+		s3Key = fmt.Sprintf("data/%s_%s_1d_%s.json", symbol, market, now.Format("20060102"))
+	case "1h":
+		// 小时线：根据市场开市时间生成，格式：{symbol}_{market}_1h_{date}_{hour}.json
+		s3Key = fmt.Sprintf("data/%s_%s_1h_%s_%02d.json", symbol, market, now.Format("20060102"), now.Hour())
+	case "1wk":
+		// 周线：同一周内一支股票只有一张，格式：{symbol}_{market}_1wk_{year}_{week}.json
+		year, week := now.ISOWeek()
+		s3Key = fmt.Sprintf("data/%s_%s_1wk_%d_%02d.json", symbol, market, year, week)
+	default:
+		// 其他时间框架使用时间戳（保持向后兼容）
+		timestamp := now.Format("20060102_150405")
+		s3Key = fmt.Sprintf("data/%s_%s_%s_%s.json", symbol, market, timeframe, timestamp)
+	}
+
+	return c.UploadFile(ctx, localPath, s3Key)
+}
+
 // UploadReader 上传Reader内容到S3
 func (c *Client) UploadReader(ctx context.Context, reader io.Reader, s3Key, contentType string) (*UploadResult, error) {
 	// 构建完整的S3 key

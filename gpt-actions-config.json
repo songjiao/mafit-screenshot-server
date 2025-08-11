@@ -1,0 +1,342 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "股票K线截图服务",
+    "description": "为股票生成K线图截图的API服务，支持美股、港股、A股市场",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://snapshot.sjfarmltd.com",
+      "description": "生产环境服务器"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "健康检查",
+        "description": "检查服务状态和运行中的任务",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "description": "服务正常",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "service": {
+                      "type": "string",
+                      "example": "screenshot"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "browser_stats": {
+                      "type": "object"
+                    },
+                    "task_stats": {
+                      "type": "object",
+                      "properties": {
+                        "running_count": {
+                          "type": "integer"
+                        },
+                        "running_tasks": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/screenshot": {
+      "post": {
+        "summary": "生成股票K线截图",
+        "description": "通过POST请求生成指定股票的K线图截图",
+        "operationId": "takeScreenshot",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "symbol",
+                  "market",
+                  "timeframe"
+                ],
+                "properties": {
+                  "symbol": {
+                    "type": "string",
+                    "description": "股票代码，如 AAPL、GOOGL、NVDA",
+                    "example": "AAPL"
+                  },
+                  "market": {
+                    "type": "string",
+                    "description": "市场代码：us(美股)、hk(港股)、cn(A股)",
+                    "enum": [
+                      "us",
+                      "hk",
+                      "cn"
+                    ],
+                    "example": "us"
+                  },
+                  "timeframe": {
+                    "type": "string",
+                    "description": "时间框架：1d(日线)、1h(小时线)、1wk(周线)",
+                    "enum": [
+                      "1d",
+                      "1h",
+                      "1wk"
+                    ],
+                    "example": "1d"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "截图生成成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Screenshot taken successfully"
+                    },
+                    "cdn_url": {
+                      "type": "string",
+                      "description": "CDN访问链接",
+                      "example": "https://your-cdn.com/screenshots/AAPL_us_1d_20250729.png"
+                    },
+                    "data_cdn_url": {
+                      "type": "string",
+                      "description": "JSON数据CDN访问链接",
+                      "example": "https://your-cdn.com/data/AAPL_us_1d_20250729.json"
+                    },
+                    "s3_url": {
+                      "type": "string",
+                      "description": "S3存储路径",
+                      "example": "screenshots/AAPL_us_1d_20250729.png"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid request parameters"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Internal server error"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/screenshot/{symbol}/{market}/{timeframe}": {
+      "get": {
+        "summary": "生成股票K线截图(GET方式)",
+        "description": "通过GET请求生成指定股票的K线图截图",
+        "operationId": "takeScreenshotGet",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "description": "股票代码，如 AAPL、GOOGL、NVDA",
+            "schema": {
+              "type": "string"
+            },
+            "example": "AAPL"
+          },
+          {
+            "name": "market",
+            "in": "path",
+            "required": true,
+            "description": "市场代码：us(美股)、hk(港股)、cn(A股)",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us",
+                "hk",
+                "cn"
+              ]
+            },
+            "example": "us"
+          },
+          {
+            "name": "timeframe",
+            "in": "path",
+            "required": true,
+            "description": "时间框架：1d(日线)、1h(小时线)、1wk(周线)",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1d",
+                "1h",
+                "1wk"
+              ]
+            },
+            "example": "1d"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "截图生成成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Screenshot taken successfully"
+                    },
+                    "cdn_url": {
+                      "type": "string",
+                      "description": "CDN访问链接",
+                      "example": "https://your-cdn.com/screenshots/AAPL_us_1d_20250729.png"
+                    },
+                    "data_cdn_url": {
+                      "type": "string",
+                      "description": "JSON数据CDN访问链接",
+                      "example": "https://your-cdn.com/data/AAPL_us_1d_20250729.json"
+                    },
+                    "s3_url": {
+                      "type": "string",
+                      "description": "S3存储路径",
+                      "example": "screenshots/AAPL_us_1d_20250729.png"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Missing required parameters"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Internal server error"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

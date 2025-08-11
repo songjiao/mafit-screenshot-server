@@ -65,6 +65,8 @@ configs/*.backup
 # 测试相关文件
 test_concurrent_screenshots.py
 test_concurrent_screenshots.sh
+test_chart_service.sh
+test_panel_data.sh
 run_test.sh
 TEST_README.md
 screenshot_test_results_*.json
